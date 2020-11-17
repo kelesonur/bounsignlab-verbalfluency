@@ -1,8 +1,14 @@
-# bounsignlab-verbalfluency
-Verbal Fluency task results and analyses
+# Info
+This study is supported under the project:
 
-# Data
-Verbal fluency task results for early and late speakers of TiD.
+**Name:** Supporting Sign Language Development of Deaf Children with Hearing Parents through Linguistically-Informed Preschool Stories
 
-# Part of a paper in revision. 
-Please use responsibly.
+**Project number:** 14458
+
+**Institution:** Boğaziçi University, Scientific Research Projects (abbrv. BAP)
+
+## Data
+Verbal fluency task results for early and late speakers of TiD. Participants: 14 Native, 15 Late
+
+# Disclaimer
+Part of a paper in revision, please use responsibly.
