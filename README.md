@@ -10,5 +10,10 @@ This study is supported under the project:
 ## Data
 Verbal fluency task results for early and late speakers of TiD. Participants: 14 Native, 15 Late
 
+## Instructions
+Please make sure you have R and Rstudio installed on your computer, together with the packages utilized in the scripts.
+
+Run the scripts in the numerical order they are designated. 
+
 # Disclaimer
 Part of a paper in revision, please use responsibly.
