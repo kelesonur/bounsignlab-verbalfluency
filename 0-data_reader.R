@@ -8,10 +8,10 @@ library(stringr)
 # read the data frame, drop NA values
 df <- read_excel("vf_data.xlsx") %>% drop_na()
 
+
 # encode vector types
 df$subject %<>% as.integer()
-df$group %<>% dplyr::recode(`0` = "Late", `1` = "Native") %>% 
-  as.factor() %>% reorder.factor(new.order = c("Native","Late"))
+df$group %<>% dplyr::recode(`0` = "Late", `1` = "Native") %>% as.factor() %>% reorder.factor(new.order = c("Native","Late"))
 df$item %<>% as.integer()
 df$difficulty %<>% as.factor()
 df$word_nr %<>% as.integer()
@@ -19,6 +19,11 @@ df$onset %<>% as.integer()
 df$offset %<>% as.integer()
 df$category %<>% as.factor()
 df$type %<>% as.factor()
+
+df$cat2 <- with(df, case_when( item %in% c(1:6) ~ "HS",
+                               item %in% c(7:12) ~ "LOC",
+                               item %in% c(13:18) ~ "SEM")) %>% as.factor()
+
 saveRDS(df,"df.rds")
 
 ### DATA AGGREGATION FOR ANALYSIS ###
@@ -58,20 +63,13 @@ saveRDS(df_correct, "df_correct.rds")
 # data frame for number of responses model
 df_ncr <- df_correct %>% 
   dplyr::distinct(subject,item, .keep_all = T) %>% 
-  dplyr::arrange(subject,item) %>%
-  dplyr::select(subject, group, item, category, difficulty, ncr) %>% ungroup()
+  dplyr::arrange(subject,item) %>% dplyr::select(subject, group, item, category, difficulty, ncr, cat2) %>% ungroup()
 saveRDS(df_ncr, "df_ncr.rds")
 
 # data frame for time course analysis 
-df_time <- df_correct %>% 
-  dplyr::distinct(subject,item, time, .keep_all = T) %>%
-  dplyr::arrange(subject,item,time) %>%
-  dplyr::select(-difference, -time_interval,-ncr,-n_correct) %>% ungroup()
-
-df_time %<>% group_by(subject,item) %>% 
-  mutate(time_cum = cumsum(time_total)) %>%
-  dplyr::select(-time_total)
-
+df_time <- df_correct %>% dplyr::distinct(subject,item, time, .keep_all = T) %>%
+  dplyr::arrange(subject,item,time) %>% dplyr::select(-difference, -time_interval,-ncr,-n_correct) %>% ungroup()
+df_time %<>% group_by(subject,item) %>% mutate(time_cum = cumsum(time_total)) %>% dplyr::select(-time_total)
 saveRDS(df_time,"df_time.rds")
 
 

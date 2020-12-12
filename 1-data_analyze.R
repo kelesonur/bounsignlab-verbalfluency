@@ -17,6 +17,10 @@ contrasts(df_ncr$category)
 contrasts(df_ncr$category) <- contr.sdif(2)
 contrasts(df_ncr$category)
 
+contrasts(df_ncr$cat2)
+contrasts(df_ncr$cat2) <- contr.sum(3)/2
+contrasts(df_ncr$cat2)
+
 contrasts(df_ncr$difficulty)
 contrasts(df_ncr$difficulty) <- contr.sdif(3)
 contrasts(df_ncr$difficulty)
@@ -28,7 +32,7 @@ contrasts(df_ncr$group) <- contr.sdif(2)
 contrasts(df_ncr$group)
 
 # model responses
-ncr_model <- brm(ncr ~ category*difficulty*group + (1|subject) + (1|item), 
+ncr_model <- brm(ncr ~ cat2*difficulty*group, 
                  family = poisson(link="log"), data = df_ncr,
                  chains = 4, cores = 4, iter= 3000, warmup = 2000, file = "ncr_model")
 
@@ -39,19 +43,24 @@ ncr_model_df <- ncr_model %>%
   subset(parameter !="Intercept") %>% dplyr::select(-x)
 
 # recode levels to make readable
-ncr_model_df$parameter %<>% dplyr::recode(`category2M1` = "Semantic", `group2M1` = "Native",
+ncr_model_df$parameter %<>% dplyr::recode(`cat21` = "HS",`cat22` = "LOC", `group2M1` = "Native",
                                           `difficulty2M1` = "Medium-Easy", `difficulty3M2` = "Hard-Medium",
-                                          `category2M1:difficulty2M1` = "Sem*Med-Easy",
-                                          `category2M1:difficulty3M2` = "Sem*Hard-Med",
-                                          `category2M1:group2M1`= "Sem*Native",
+                                          `cat21:difficulty2M1` = "HS*Med-Easy",
+                                          `cat21:difficulty3M2` = "HS*Hard-Med",
+                                          `cat22:difficulty2M1` = "LOC*Med-Easy",
+                                          `cat22:difficulty3M2` = "LOC*Hard-Med",
+                                          `cat21:group2M1`= "HS*Native",
+                                          `cat22:group2M1`= "LOC*Native",
                                           `difficulty2M1:group2M1` = "Med-Easy*Native",
                                           `difficulty3M2:group2M1` = "Hard-Med*Native",
-                                          `category2M1:difficulty2M1:group2M1` = "Sem*M-E*Native",
-                                          `category2M1:difficulty3M2:group2M1` = "Sem*H-M*Native") %>%
-  reorder.factor(new.order = c("Semantic","Native","Medium-Easy",
-                               "Hard-Medium","Sem*Med-Easy","Sem*Hard-Med",
-                               "Sem*Native","Med-Easy*Native","Hard-Med*Native",
-                               "Sem*M-E*Native","Sem*H-M*Native"))
+                                          `cat21:difficulty2M1:group2M1` = "HS*M-E*Native",
+                                          `cat21:difficulty3M2:group2M1` = "HS*H-M*Native",
+                                          `cat22:difficulty2M1:group2M1` = "LOC*M-E*Native",
+                                          `cat22:difficulty3M2:group2M1` = "LOC*H-M*Native") %>%
+  reorder.factor(new.order = c("HS", "LOC", "Native", "Medium-Easy",
+                               "Hard-Medium", "HS*Med-Easy", "HS*Hard-Med", "LOC*Med-Easy", "LOC*Hard-Med",
+                               "HS*Native", "LOC*Native", "Med-Easy*Native", "Hard-Med*Native",
+                               "HS*M-E*Native", "HS*H-M*Native", "LOC*M-E*Native", "LOC*H-M*Native"))
 
 saveRDS(ncr_model_df, "ncr_model_df.rds")
 
@@ -62,6 +71,10 @@ df_time <- readRDS("df_time.rds")
 contrasts(df_time$category)
 contrasts(df_time$category) <- contr.sdif(2)
 contrasts(df_time$category)
+
+contrasts(df_time$cat2)
+contrasts(df_time$cat2) <- contr.sum(3)/2
+contrasts(df_time$cat2)
 
 contrasts(df_time$difficulty)
 contrasts(df_time$difficulty) <- contr.sdif(3)
@@ -80,7 +93,7 @@ contrasts(df_time$time) <- contr.sdif(6)
 contrasts(df_time$time)
 
 # regression model
-time_model <- brm(time_cum ~ category*group*time*difficulty + (1|subject) + (1|item),
+time_model <- brm(time_cum ~ cat2*group*time*difficulty,
                    family = poisson(link="log"), data = df_time,
                    chains = 4, cores = 4, iter= 3000, warmup = 2000, file = "time_model")
 

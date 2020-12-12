@@ -2,6 +2,9 @@ library(dplyr)
 library(magrittr)
 library(ggplot2)
 theme_set(theme_bw())
+library(bayesplot)
+bayesplot_theme_set(new = theme_bw())
+library(gdata)
 library(extrafont) 
 font_import(pattern = "Times New Roman", prompt = F)
 loadfonts()
@@ -18,30 +21,30 @@ df_correct <- readRDS("df_correct.rds")
 
 ### DATA PLOTS ###
 # how many of things there are
-df %>% dplyr::select(response_type = type, category, Group = group) %>%
-  group_by(category,response_type,Group) %>%
+df %>% dplyr::select(response_type = type, cat2, Group = group) %>%
+  group_by(cat2,response_type,Group) %>%
   ggplot(aes(response_type, fill=Group)) + 
   geom_bar(position = "dodge") +
   stat_count(geom = "text", aes(color = Group, label = ..count..), vjust = "bottom", position = position_dodge(0.85)) +
-  facet_grid(category~.) +
+  facet_grid(cat2~.) +
   ylab("Count") + xlab("Response Type") +
   theme(text=element_text(family="Times New Roman", size=12))
 
 # mean correct responses
-df_ncr %>% group_by(Group = group, difficulty2, category) %>%
+df_ncr %>% group_by(Group = group, difficulty2, cat2) %>%
   summarise(mean_response = mean(ncr), ci = ci(ncr)) %>%
   ggplot(aes(difficulty2,mean_response, group = Group, color = Group)) + 
   geom_point() + geom_line() + 
   geom_errorbar(aes(ymax = mean_response + ci, ymin = mean_response - ci), width = .14) +
-  facet_grid(.~category) + xlab("Difficulty") + ylab("Mean Response") +
+  facet_grid(.~cat2) + xlab("Difficulty") + ylab("Mean Response") +
   theme(text=element_text(family= "Times New Roman", size=12))
 
 # cumulative correct responses by time
 diff_labs <- c("Easy","Medium","Hard")
 names(diff_labs) <- c("1","2","3")
-df_correct %>% group_by(Group = group, category, difficulty) %>%
-  ggplot(aes(time_sec, group = Group, color = Group)) + stat_ecdf(geom = "step") +
-  facet_grid(category~difficulty, labeller = labeller(difficulty = diff_labs)) + 
+df_correct %>% group_by(Group = group, cat2, difficulty) %>%
+  ggplot(aes(time_sec, group = Group, color = Group)) + stat_ecdf(geom = "point") +
+  facet_grid(cat2~difficulty, labeller = labeller(difficulty = diff_labs)) + 
   ylab("% of Data") + xlab("Time (seconds)") + 
   theme(text=element_text(family="Times New Roman", size=12))
 
@@ -49,7 +52,8 @@ df_correct %>% group_by(Group = group, category, difficulty) %>%
 
 ### MODEL PLOTS ###
 # total number of correct responses #
-ncr_model_df <- readRDS("ncr_model_df.rds")
+ncr_model_df <- readRDS("ncr_model_df.rds") %>% head(13)
+
 ncr_model_df %>% ggplot(aes(m, y=factor(parameter, 
                                         levels = rev(levels(factor(parameter)))))) +
   theme(text=element_text(family="Times New Roman", size=12)) + geom_point(size = 2) +
