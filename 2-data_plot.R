@@ -18,6 +18,13 @@ df_ncr <- readRDS("df_ncr.rds")
 df_ncr$difficulty2 <- dplyr::recode(df_ncr$difficulty,`1` = "Easy", `2` = "Med", `3` = "Hard") %>% 
   as.factor() %>% reorder.factor(new.order = c("Easy","Med","Hard"))
 df_correct <- readRDS("df_correct.rds")
+df_time <- readRDS("df_time.rds")
+df_correct_means <- df_time %>% group_by(Group = group, cat2, time, difficulty) %>%
+  summarise(mean_response = mean(time_cum), ci = ci(time_cum)) %>% ungroup()
+df_latency <- readRDS("df_latency.rds")
+df_latencies <- df_latency %>% group_by(Group = group, cat2, difficulty) %>%
+  summarise(mean_srt = mean(srt), ci_srt = ci(srt))
+
 
 ############################## DATA PLOTS ##############################
 # how many of things there are
@@ -39,15 +46,19 @@ fig2 <- df_ncr %>% group_by(Group = group, difficulty2, cat2) %>%
   facet_grid(.~cat2) + xlab("Difficulty") + ylab("Mean Response") +
   theme(text=element_text(family= "Times New Roman", size=12))
 
-# cumulative correct responses by time
+# cumulative mean responses through time course #
 diff_labs <- c("Easy","Medium","Hard")
 names(diff_labs) <- c("1","2","3")
-fig4 <- df_correct %>% group_by(Group = group, cat2, difficulty) %>%
-  ggplot(aes(time_sec, group = Group, color = Group)) + stat_ecdf(geom = "step") +
-  facet_grid(cat2~difficulty, labeller = labeller(difficulty = diff_labs)) + 
-  ylab("% of Data") + xlab("Time (seconds)") + 
-  theme(text=element_text(family="Times New Roman", size=12))
-
+fig4 <- ggplot() + geom_point(data = df_correct_means, aes(time, mean_response, group = Group, color = Group)) +
+  geom_line(data = df_correct_means, aes(time, mean_response, group = Group, color = Group)) +
+  geom_errorbar(data = df_correct_means, aes(x= time, y= mean_response, 
+                                             ymax = mean_response + ci, ymin = mean_response - ci,
+                                             group = Group, color = Group), width = .5) +
+  geom_rect(data = df_latencies,aes(xmin = (mean_srt-ci_srt), xmax = (mean_srt + ci_srt),
+                                    ymin = -Inf, ymax = +Inf, fill = Group, group = Group),alpha = .3) +
+  geom_vline(data = df_latencies, aes(xintercept = mean_srt, group = Group, color = Group)) +
+  facet_grid(cat2 ~ difficulty, labeller = labeller(difficulty = diff_labs)) +
+  xlab("Time") + ylab("Mean Response")
 
 
 ############################## MODEL PLOTS ##############################
@@ -69,7 +80,6 @@ fig5 <- time_model_df %>% ggplot(aes(m, y=factor(parameter,
   geom_errorbarh(aes(xmin = l, xmax = h), alpha = 1, height = 0, size = 1) +
   geom_errorbarh(aes(xmin = ll, xmax = hh, height = 0)) + vline_0() +
   xlab("Estimate(log)") + ylab("Coefficients")
-
 
 ############################## SAVE PLOTS ##############################
 # figure 1 save

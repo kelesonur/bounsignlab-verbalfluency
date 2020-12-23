@@ -44,18 +44,19 @@ df_correct %<>% group_by(subject,item) %>% mutate(ncr = n())
 df_correct %<>% group_by(subject,item) %>% mutate(n_correct = 1:n())
 
 # calculate time seconds and slots
-df_correct$time_sec <- round((df_correct$time_interval/1000), digits = 0) %>% as.integer()
+# df_correct$time_sec <- round((df_correct$time_interval/1000), digits = 0) %>% as.integer()
 df_correct$time <- with(df_correct, 
                         case_when(
-                          time_sec >= 0  & time_sec < 10 ~ "10",
-                          time_sec >= 10 & time_sec < 20 ~ "20",
-                          time_sec >= 20 & time_sec < 30 ~ "30",
-                          time_sec >= 30 & time_sec < 40 ~ "40",
-                          time_sec >= 40 & time_sec < 50 ~ "50",
+                          time_interval >= 0  & time_interval < 10000 ~ "10",
+                          time_interval >= 10000 & time_interval < 20000 ~ "20",
+                          time_interval >= 20000 & time_interval < 30000 ~ "30",
+                          time_interval >= 30000 & time_interval < 40000 ~ "40",
+                          time_interval >= 40000 & time_interval < 50000 ~ "50",
                           T ~ "60")) %>% as.integer()
 
 # total number of responses for each time period 
 df_correct %<>% group_by(subject, item, time) %>% mutate(time_total = n()) %>% ungroup()
+df_correct %<>% mutate(latency_ms = time_interval - (time*1000) + 10000)
 saveRDS(df_correct, "df_correct.rds")
 
 
@@ -68,31 +69,14 @@ saveRDS(df_ncr, "df_ncr.rds")
 
 # data frame for time course analysis 
 df_time <- df_correct %>% dplyr::distinct(subject,item, time, .keep_all = T) %>%
-  dplyr::arrange(subject,item,time) %>% dplyr::select(-difference, -time_interval,-ncr,-n_correct) %>% ungroup()
-df_time %<>% group_by(subject,item) %>% mutate(time_cum = cumsum(time_total)) %>% dplyr::select(-time_total)
+  dplyr::arrange(subject,item,time) %>% dplyr::select(-difference, -time_interval, -ncr, -n_correct, -latency_ms) %>% ungroup()
+df_time %<>% group_by(subject,item) %>% mutate(time_cum = cumsum(time_total))
 saveRDS(df_time,"df_time.rds")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# mean latency ms
+df_latency <- df_correct %>% group_by(subject, item) %>% slice(2) %>%
+  dplyr::select(subject,item, first_ms = latency_ms)
+df_latency <- left_join(df_correct, df_latency) %>% mutate(srt = (time_interval - first_ms)/1000) %>% subset(srt > 0)
+saveRDS(df_latency, "df_latency.rds")
 
 
