@@ -8,7 +8,7 @@ This study is supported under the project:
 **Institution:** Boğaziçi University, Scientific Research Projects (abbrv. BAP)
 
 ## Data
-Verbal fluency task results for early and late speakers of TiD. Participants: 14 Native, 15 Late
+Verbal fluency task results for early and late speakers of TİD. Participants: 15 Native, 16 Late
 
 ## Instructions
 Please make sure you have R and Rstudio installed on your computer, together with the packages utilized in the scripts.
