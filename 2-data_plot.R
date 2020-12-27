@@ -18,7 +18,7 @@ df_ncr <- readRDS("df_ncr.rds")
 df_ncr$difficulty2 <- dplyr::recode(df_ncr$difficulty,`1` = "Easy", `2` = "Med", `3` = "Hard") %>% 
   as.factor() %>% reorder.factor(new.order = c("Easy","Med","Hard"))
 df_correct <- readRDS("df_correct.rds")
-df_time <- readRDS("df_time.rds")
+df_time <- readRDS("df_cum_time.rds")
 df_correct_means <- df_time %>% group_by(Group = group, cat2, time, difficulty) %>%
   summarise(mean_response = mean(time_cum), ci = ci(time_cum)) %>% ungroup()
 df_latency <- readRDS("df_latency.rds")
@@ -60,7 +60,7 @@ fig4 <- ggplot() + geom_point(data = df_correct_means, aes(time, mean_response, 
   facet_grid(cat2 ~ difficulty, labeller = labeller(difficulty = diff_labs)) +
   xlab("Time") + ylab("Mean Response")
 
-
+x <- 
 ############################## MODEL PLOTS ##############################
 # total number of correct responses #
 ncr_model_df <- readRDS("ncr_model_df.rds") %>% head(13)

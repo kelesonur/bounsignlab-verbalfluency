@@ -65,7 +65,7 @@ ncr_model_df$parameter %<>% dplyr::recode(`cat21` = "HS",`cat22` = "LOC", `group
 saveRDS(ncr_model_df, "ncr_model_df.rds")
 
 ############################################ TIME COURSE ANALYSIS ############################################
-df_time <- readRDS("df_time.rds")
+df_time <- readRDS("df_cum_time.rds")
 
 ### contrast coding for the predictors ###
 contrasts(df_time$category)

@@ -73,6 +73,28 @@ df_time <- df_correct %>% dplyr::distinct(subject,item, time, .keep_all = T) %>%
 df_time %<>% group_by(subject,item) %>% mutate(time_cum = cumsum(time_total))
 saveRDS(df_time,"df_time.rds")
 
+# fill empty intervals for cumulative reading
+df_cum_time <- df_time %>% arrange(subject, item, time)
+
+for (each in unique(df_cum_time$subject)){
+  for(every in unique(df_cum_time$item)){
+    x <- df_cum_time %>% subset(subject == each & item == every)
+    for(all in c(1:6)){
+      x %<>% arrange(subject,item, time)
+      time = all*10
+      if (time != x$time[all] || is.na(x$time[all])){
+        y <- tibble(subject = x$subject[1], group = x$group[1], item = x$item[1], category = x$category[1],
+                    difficulty = x$difficulty[1], cat2 = x$cat2[1], time = time, time_total = 0, time_cum = x$time_cum[all-1])
+        df_cum_time %<>% rbind(y)
+        x %<>% rbind(y)
+      }
+     next
+    }
+  }
+}
+  
+df_cum_time %<>% arrange(subject,item,time) %>% drop_na()
+saveRDS(df_cum_time, "df_cum_time.rds")
 # mean latency ms
 df_latency <- df_correct %>% group_by(subject, item) %>% slice(2) %>%
   dplyr::select(subject,item, first_ms = latency_ms)
