@@ -36,6 +36,9 @@ ncr_model <- brm(ncr ~ cat2*difficulty*group,
                  family = poisson(link="log"), data = df_ncr,
                  chains = 4, cores = 4, iter= 3000, warmup = 2000, file = "ncr_model")
 
+interaction_loc <-hypothesis(ncr_model, "cat22:difficulty2M1 > 0")
+interaction_loc2 <-hypothesis(ncr_model, "cat22:difficulty3M2 > 0")
+
 # model df for plotting
 ncr_model_df <- ncr_model %>%
   mcmc_intervals_data(pars = vars(starts_with("b_")), prob_outer = 0.95) %>%
@@ -61,6 +64,8 @@ ncr_model_df$parameter %<>% dplyr::recode(`cat21` = "HS",`cat22` = "LOC", `group
                                "Hard-Medium", "HS*Med-Easy", "HS*Hard-Med", "LOC*Med-Easy", "LOC*Hard-Med",
                                "HS*Native", "LOC*Native", "Med-Easy*Native", "Hard-Med*Native",
                                "HS*M-E*Native", "HS*H-M*Native", "LOC*M-E*Native", "LOC*H-M*Native"))
+
+
 
 saveRDS(ncr_model_df, "ncr_model_df.rds")
 
