@@ -20,9 +20,9 @@ df$offset %<>% as.integer()
 df$category %<>% as.factor()
 df$type %<>% as.factor()
 
-df$cat2 <- with(df, case_when( item %in% c(1:6) ~ "HS",
-                               item %in% c(7:12) ~ "LOC",
-                               item %in% c(13:18) ~ "SEM")) %>% as.factor()
+df$cat2 <- with(df, case_when(item %in% c(1:6) ~ "HS",
+                              item %in% c(7:12) ~ "LOC",
+                              item %in% c(13:18) ~ "SEM")) %>% as.factor()
 
 saveRDS(df,"df.rds")
 
