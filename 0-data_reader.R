@@ -6,7 +6,7 @@ library(gdata)
 library(stringr)
 
 # read the data frame, drop NA values
-df <- read_excel("vf_data.xlsx") %>% drop_na()
+df <- read_csv("vf_data.csv") %>% drop_na()
 
 
 # encode vector types
