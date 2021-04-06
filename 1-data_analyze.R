@@ -36,9 +36,6 @@ ncr_model <- brm(ncr ~ cat2*difficulty*group,
                  family = poisson(link="log"), data = df_ncr,
                  chains = 4, cores = 4, iter= 3000, warmup = 2000, file = "ncr_model")
 
-interaction_loc <-hypothesis(ncr_model, "cat22:difficulty2M1 > 0")
-interaction_loc2 <-hypothesis(ncr_model, "cat22:difficulty3M2 > 0")
-
 # model df for plotting
 ncr_model_df <- ncr_model %>%
   mcmc_intervals_data(pars = vars(starts_with("b_")), prob_outer = 0.95) %>%
@@ -65,12 +62,11 @@ ncr_model_df$parameter %<>% dplyr::recode(`cat21` = "HS",`cat22` = "LOC", `group
                                "HS*Native", "LOC*Native", "Med-Easy*Native", "Hard-Med*Native",
                                "HS*M-E*Native", "HS*H-M*Native", "LOC*M-E*Native", "LOC*H-M*Native"))
 
-
-
 saveRDS(ncr_model_df, "ncr_model_df.rds")
+write.csv(ncr_model_df,"ncr_model_results.csv")
 
 ############################################ TIME COURSE ANALYSIS ############################################
-df_time <- readRDS("df_cum_time.rds")
+df_time <- readRDS("df_time.rds")
 
 ### contrast coding for the predictors ###
 contrasts(df_time$category)
@@ -123,6 +119,7 @@ time_model_df$parameter %<>% dplyr::recode(`group2M1` = "Native", `time2M1` = "2
                                "Native*20s-10s","Native*30s-20s","Native*40s-30s","Native*50s-40s","Native*60s-50s"))
 
 saveRDS(time_model_df, "time_model_df.rds")
+write.csv(time_model_df,"time_model_results.csv")
 
 
 
