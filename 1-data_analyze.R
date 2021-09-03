@@ -1,16 +1,13 @@
-library(dplyr)
+library(tidyverse)
 library(magrittr)
-library(tidyr)
 library(gdata)
-library(stringr)
 library(brms)
 library(MASS)
 library(bayesplot)
-library(tidybayes) 
+library(tidybayes)
 
-
-######################################### CORRECT RESPONSES ANALYSIS #########################################
-df_ncr <- readRDS("df_ncr.rds")
+#### CORRECT RESPONSES ANALYSIS ####
+df_ncr <- readRDS("./aggregated_data/df_ncr.rds")
 
 ### contrast coding for the predictors ###
 contrasts(df_ncr$category)
@@ -32,9 +29,9 @@ contrasts(df_ncr$group) <- contr.sdif(2)
 contrasts(df_ncr$group)
 
 # model responses
-ncr_model <- brm(ncr ~ cat2*difficulty*group, 
+ncr_model <- brm(ncr ~ (cat2+difficulty+group)^2, 
                  family = poisson(link="log"), data = df_ncr,
-                 chains = 4, cores = 4, iter= 3000, warmup = 2000, file = "ncr_model")
+                 chains = 4, cores = 4, iter= 3000, warmup = 2000, file = "./models_data/ncr_model")
 
 # model df for plotting
 ncr_model_df <- ncr_model %>%
@@ -52,51 +49,46 @@ ncr_model_df$parameter %<>% dplyr::recode(`cat21` = "HS",`cat22` = "LOC", `group
                                           `cat21:group2M1`= "HS*Native",
                                           `cat22:group2M1`= "LOC*Native",
                                           `difficulty2M1:group2M1` = "Med-Easy*Native",
-                                          `difficulty3M2:group2M1` = "Hard-Med*Native",
-                                          `cat21:difficulty2M1:group2M1` = "HS*M-E*Native",
-                                          `cat21:difficulty3M2:group2M1` = "HS*H-M*Native",
-                                          `cat22:difficulty2M1:group2M1` = "LOC*M-E*Native",
-                                          `cat22:difficulty3M2:group2M1` = "LOC*H-M*Native") %>%
+                                          `difficulty3M2:group2M1` = "Hard-Med*Native") %>%
   reorder.factor(new.order = c("HS", "LOC", "Native", "Medium-Easy",
                                "Hard-Medium", "HS*Med-Easy", "HS*Hard-Med", "LOC*Med-Easy", "LOC*Hard-Med",
-                               "HS*Native", "LOC*Native", "Med-Easy*Native", "Hard-Med*Native",
-                               "HS*M-E*Native", "HS*H-M*Native", "LOC*M-E*Native", "LOC*H-M*Native"))
+                               "HS*Native", "LOC*Native", "Med-Easy*Native", "Hard-Med*Native"))
 
-saveRDS(ncr_model_df, "ncr_model_df.rds")
-write.csv(ncr_model_df,"ncr_model_results.csv")
+saveRDS(ncr_model_df, "./models_data/ncr_model_df.rds")
+write.csv(ncr_model_df,"./models_data/ncr_model_results.csv")
 
-############################################ TIME COURSE ANALYSIS ############################################
-df_time <- readRDS("df_time.rds")
+#### TIME COURSE ANALYSIS ####
+df_cum_time <- readRDS("./aggregated_data/df_cum_time.rds")
 
 ### contrast coding for the predictors ###
-contrasts(df_time$category)
-contrasts(df_time$category) <- contr.sdif(2)
-contrasts(df_time$category)
+contrasts(df_cum_time$category)
+contrasts(df_cum_time$category) <- contr.sdif(2)
+contrasts(df_cum_time$category)
 
-contrasts(df_time$cat2)
-contrasts(df_time$cat2) <- contr.sum(3)/2
-contrasts(df_time$cat2)
+contrasts(df_cum_time$cat2)
+contrasts(df_cum_time$cat2) <- contr.sum(3)/2
+contrasts(df_cum_time$cat2)
 
-contrasts(df_time$difficulty)
-contrasts(df_time$difficulty) <- contr.sdif(3)
-contrasts(df_time$difficulty)
-
-
-df_time$group %<>% reorder.factor(new.order = c("Late","Native"))
-contrasts(df_time$group)
-contrasts(df_time$group) <- contr.sdif(2)
-contrasts(df_time$group)
+contrasts(df_cum_time$difficulty)
+contrasts(df_cum_time$difficulty) <- contr.sdif(3)
+contrasts(df_cum_time$difficulty)
 
 
-df_time$time %<>% as.factor()
-contrasts(df_time$time)
-contrasts(df_time$time) <- contr.sdif(6)
-contrasts(df_time$time)
+df_cum_time$group %<>% reorder.factor(new.order = c("Late","Native"))
+contrasts(df_cum_time$group)
+contrasts(df_cum_time$group) <- contr.sdif(2)
+contrasts(df_cum_time$group)
+
+
+df_cum_time$time %<>% as.factor()
+contrasts(df_cum_time$time)
+contrasts(df_cum_time$time) <- contr.sdif(6)
+contrasts(df_cum_time$time)
 
 # regression model
-time_model <- brm(time_cum ~ cat2*group*time*difficulty,
-                   family = poisson(link="log"), data = df_time,
-                   chains = 4, cores = 4, iter= 3000, warmup = 2000, file = "time_model")
+time_model <- brm(time_cum ~ (cat2+group+time+difficulty)^2,
+                   family = poisson(link="log"), data = df_cum_time,
+                   chains = 4, cores = 4, iter= 3000, warmup = 2000, file = "./models_data/time_model")
 
 # time model df
 time_model_df <- time_model %>%
@@ -118,8 +110,8 @@ time_model_df$parameter %<>% dplyr::recode(`group2M1` = "Native", `time2M1` = "2
   reorder.factor(new.order = c("Native","20s-10s","30s-20s","40s-30s","50s-40s","60s-50s",
                                "Native*20s-10s","Native*30s-20s","Native*40s-30s","Native*50s-40s","Native*60s-50s"))
 
-saveRDS(time_model_df, "time_model_df.rds")
-write.csv(time_model_df,"time_model_results.csv")
+saveRDS(time_model_df, "./models_data/time_model_df.rds")
+write.csv(time_model_df,"./models_data/time_model_results.csv")
 
 
 

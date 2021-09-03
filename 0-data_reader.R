@@ -1,15 +1,9 @@
-library(dplyr)
+library(tidyverse)
 library(magrittr)
-library(tidyr)
-library(readxl) 
-library(readr)
 library(gdata)
-library(stringr)
 
 # read the data frame, drop NA values
 df <- read_csv("vf_data.csv") %>% drop_na()
-# df <- read_excel("vf_data.xlsx") %>% drop_na()
-
 
 # encode vector types
 df$subject %<>% as.integer()
@@ -26,9 +20,9 @@ df$cat2 <- with(df, case_when(item %in% c(1:6) ~ "HS",
                               item %in% c(7:12) ~ "LOC",
                               item %in% c(13:18) ~ "SEM")) %>% as.factor()
 
-saveRDS(df,"df.rds")
+saveRDS(df,"./aggregated_data/df.rds")
 
-### DATA AGGREGATION FOR ANALYSIS ###
+#### DATA AGGREGATION FOR ANALYSIS ####
 # correct responses for analysis, order by subject and onset
 df_correct <- df %>% subset(type =="Correct") %>% dplyr::select(-type, -offset, -word_nr)
 df_correct %<>% dplyr::arrange(subject,onset)
@@ -59,21 +53,20 @@ df_correct$time <- with(df_correct,
 # total number of responses for each time period 
 df_correct %<>% group_by(subject, item, time) %>% mutate(time_total = n()) %>% ungroup()
 df_correct %<>% mutate(latency_ms = time_interval - (time*1000) + 10000)
-saveRDS(df_correct, "df_correct.rds")
+saveRDS(df_correct, "./aggregated_data/df_correct.rds")
 
-
-### MODEL DATA FRAMES ###
+#### MODEL DATA FRAMES ####
 # data frame for number of responses model
 df_ncr <- df_correct %>% 
   dplyr::distinct(subject,item, .keep_all = T) %>% 
   dplyr::arrange(subject,item) %>% dplyr::select(subject, group, item, category, difficulty, ncr, cat2) %>% ungroup()
-saveRDS(df_ncr, "df_ncr.rds")
+saveRDS(df_ncr, "./aggregated_data/df_ncr.rds")
 
 # data frame for time course analysis 
 df_time <- df_correct %>% dplyr::distinct(subject,item, time, .keep_all = T) %>%
   dplyr::arrange(subject,item,time) %>% dplyr::select(-difference, -time_interval, -ncr, -n_correct, -latency_ms) %>% ungroup()
 df_time %<>% group_by(subject,item) %>% mutate(time_cum = cumsum(time_total))
-saveRDS(df_time,"df_time.rds")
+saveRDS(df_time,"./aggregated_data/df_time.rds")
 
 # fill empty intervals for cumulative reading
 df_cum_time <- df_time %>% arrange(subject, item, time)
@@ -96,11 +89,12 @@ for (each in unique(df_cum_time$subject)){
 }
   
 df_cum_time %<>% arrange(subject,item,time) %>% drop_na()
-saveRDS(df_cum_time, "df_cum_time.rds")
+saveRDS(df_cum_time, "./aggregated_data/df_cum_time.rds")
+
 # mean latency ms
 df_latency <- df_correct %>% group_by(subject, item) %>% slice(2) %>%
   dplyr::select(subject,item, first_ms = latency_ms)
 df_latency <- left_join(df_correct, df_latency) %>% mutate(srt = (time_interval - first_ms)/1000) %>% subset(srt > 0)
-saveRDS(df_latency, "df_latency.rds")
+saveRDS(df_latency, "./aggregated_data/df_latency.rds")
 
 

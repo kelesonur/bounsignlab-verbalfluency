@@ -1,6 +1,5 @@
-library(dplyr)
+library(tidyverse)
 library(magrittr)
-library(ggplot2)
 theme_set(theme_bw())
 library(bayesplot)
 bayesplot_theme_set(new = theme_bw())
@@ -12,21 +11,21 @@ loadfonts()
 # function for calculating %95 confidence intervals
 ci <- function(x){1.96*(sd(x)/sqrt(length(x)))}
 
-df <- readRDS("df.rds")
-df_ncr <- readRDS("df_ncr.rds")
+df <- readRDS("./aggregated_data/df.rds")
+df_ncr <- readRDS("./aggregated_data/df_ncr.rds")
 # recode factors for easy read
 df_ncr$difficulty2 <- dplyr::recode(df_ncr$difficulty,`1` = "Easy", `2` = "Med", `3` = "Hard") %>% 
   as.factor() %>% reorder.factor(new.order = c("Easy","Med","Hard"))
-df_correct <- readRDS("df_correct.rds")
-df_time <- readRDS("df_cum_time.rds")
+df_correct <- readRDS("./aggregated_data/df_correct.rds")
+df_time <- readRDS("./aggregated_data/df_cum_time.rds")
 df_correct_means <- df_time %>% group_by(Group = group, cat2, time, difficulty) %>%
   summarise(mean_response = mean(time_cum), ci = ci(time_cum)) %>% ungroup()
-df_latency <- readRDS("df_latency.rds")
+df_latency <- readRDS("./aggregated_data/df_latency.rds")
 df_latencies <- df_latency %>% group_by(Group = group, cat2, difficulty) %>%
   summarise(mean_srt = mean(srt), ci_srt = ci(srt))
 
 
-############################## DATA PLOTS ##############################
+#### DATA PLOTS ####
 # how many of things there are
 fig1 <- df %>% dplyr::select(response_type = type, cat2, Group = group) %>%
   group_by(cat2,response_type,Group) %>%
@@ -60,10 +59,9 @@ fig4 <- ggplot() + geom_point(data = df_correct_means, aes(time, mean_response, 
   facet_grid(cat2 ~ difficulty, labeller = labeller(difficulty = diff_labs)) +
   xlab("Time") + ylab("Mean Response")
 
-x <- 
-############################## MODEL PLOTS ##############################
+#### MODEL PLOTS ####
 # total number of correct responses #
-ncr_model_df <- readRDS("ncr_model_df.rds") %>% head(13)
+ncr_model_df <- readRDS("./models_data/ncr_model_df.rds")
 
 fig3 <- ncr_model_df %>% ggplot(aes(m, y=factor(parameter, 
                                         levels = rev(levels(factor(parameter)))))) +
@@ -73,7 +71,7 @@ fig3 <- ncr_model_df %>% ggplot(aes(m, y=factor(parameter,
   xlab("Estimate(log)") + ylab("Coefficients")
 
 # number of correct responses through time course #
-time_model_df <- readRDS("time_model_df.rds")
+time_model_df <- readRDS("./models_data/time_model_df.rds")
 fig5 <- time_model_df %>% ggplot(aes(m, y=factor(parameter, 
                                          levels = rev(levels(factor(parameter)))))) +
   theme(text=element_text(family="Times New Roman", size=12)) + geom_point(size = 2) +
@@ -81,7 +79,7 @@ fig5 <- time_model_df %>% ggplot(aes(m, y=factor(parameter,
   geom_errorbarh(aes(xmin = ll, xmax = hh, height = 0)) + vline_0() +
   xlab("Estimate(log)") + ylab("Coefficients")
 
-############################## SAVE PLOTS ##############################
+#### SAVE PLOTS ####
 # figure 1 save
 ggsave("VF-Fig_1.pdf", plot = fig1, width = 6, height = 6, device = cairo_pdf, path = "./VF-figures")
 ggsave("VF-Fig_1.tiff", plot = fig1, width = 6, height = 6, path = "./VF-figures")
