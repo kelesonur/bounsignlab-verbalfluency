@@ -1,18 +1,21 @@
 library(tidyverse)
+library(ggpubr)
 library(magrittr)
 theme_set(theme_bw())
 library(bayesplot)
 bayesplot_theme_set(new = theme_bw())
 library(gdata)
-library(extrafont) 
+library(extrafont)
 font_import(pattern = "Times New Roman", prompt = F)
 loadfonts()
+
 
 # function for calculating %95 confidence intervals
 ci <- function(x){1.96*(sd(x)/sqrt(length(x)))}
 
 df <- readRDS("./aggregated_data/df.rds")
 df_ncr <- readRDS("./aggregated_data/df_ncr.rds")
+
 # recode factors for easy read
 df_ncr$difficulty2 <- dplyr::recode(df_ncr$difficulty,`1` = "Easy", `2` = "Med", `3` = "Hard") %>% 
   as.factor() %>% reorder.factor(new.order = c("Easy","Med","Hard"))
@@ -78,6 +81,41 @@ fig5 <- time_model_df %>% ggplot(aes(m, y=factor(parameter,
   geom_errorbarh(aes(xmin = l, xmax = h), alpha = 1, height = 0, size = 1) +
   geom_errorbarh(aes(xmin = ll, xmax = hh, height = 0)) + vline_0() +
   xlab("Estimate(log)") + ylab("Coefficients")
+
+#### SIMULATED DATA PLOTS ####
+df_simulated_summary <- readRDS("./models_data/df_simulated_summary.rds")
+df_simulated_srt_summary <- readRDS("./models_data/df_simulated_srt_summary.rds")
+pd2 <- position_dodge(0.3)
+
+# plotting different retrieval rate, same vocabulary size
+sim_plot_1 <- df_simulated_summary %>% subset(simulated == "DifRateEqSize") %>%
+  ggplot(aes(time, mean_ncr, group = group, linetype = group, color = group, fill = group, shape = group)) + 
+  geom_line(position = pd2, size = .75) + geom_point(size = 3) +
+  labs(x="Time (Sec)", y="Mean Response") +
+  ggtitle("Similar vocabulary size and different retrieval rate") +
+  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[3], y=15, label= expression("SRT"[1]), color="black", size = 4.5) +
+  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[1], y=16, label= expression("SRT"[2]), color="black", size = 4.5) +
+  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[3], y = 14.5, xend = df_simulated_srt_summary$mean_srt[3], yend = 13.5), size = 1,
+               arrow = arrow(length = unit(0.2, "cm")), color="black",show.legend = F) +
+  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[1], y = 15.5, xend = df_simulated_srt_summary$mean_srt[1], yend = 14.5), size = 1,
+               arrow = arrow(length = unit(0.2, "cm")), color="black",show.legend = F) +
+  theme(text=element_text(family="Times New Roman", size=12), axis.text = element_blank(), axis.ticks = element_blank())
+
+sim_plot_2 <- df_simulated_summary %>% subset(simulated == "EqRateDifSize") %>%
+  ggplot(aes(time, mean_ncr, group = group, linetype = group, color = group, fill = group, shape = group)) + 
+  geom_line(position = pd2, size = .75) + geom_point(size = 3) +
+  labs(x="Time (Sec)", y="") +
+  ggtitle("Different vocabulary size and similar retrieval rate") +
+  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[4], y=14, label= expression("SRT"[1]), color="black", size = 4.5) +
+  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[2], y=9.5, label= expression("SRT"[2]), color="black", size = 4.5) + 
+  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[4], y = 13.5, xend = df_simulated_srt_summary$mean_srt[4], yend = 12.5), size = 1,
+               arrow = arrow(length = unit(0.2, "cm")), color="black",show.legend = F) +
+  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[2], y = 9, xend = df_simulated_srt_summary$mean_srt[2], yend = 8), size = 1,
+               arrow = arrow(length = unit(0.2, "cm")), color="black",show.legend = F) +
+  theme(text=element_text(family="Times New Roman", size=12), axis.text = element_blank(), axis.ticks = element_blank())
+
+combined_plot <- ggarrange(sim_plot_1, sim_plot_2, ncol=2, nrow=1, common.legend = TRUE,legend="bottom",labels=c("A", "B"))
+combined_plot
 
 #### SAVE PLOTS ####
 # figure 1 save
