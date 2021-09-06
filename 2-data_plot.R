@@ -9,7 +9,6 @@ library(extrafont)
 font_import(pattern = "Times New Roman", prompt = F)
 loadfonts()
 
-
 # function for calculating %95 confidence intervals
 ci <- function(x){1.96*(sd(x)/sqrt(length(x)))}
 
@@ -27,7 +26,6 @@ df_latency <- readRDS("./aggregated_data/df_latency.rds")
 df_latencies <- df_latency %>% group_by(Group = group, cat2, difficulty) %>%
   summarise(mean_srt = mean(srt), ci_srt = ci(srt))
 
-
 #### DATA PLOTS ####
 # how many of things there are
 fig1 <- df %>% dplyr::select(response_type = type, cat2, Group = group) %>%
@@ -38,6 +36,7 @@ fig1 <- df %>% dplyr::select(response_type = type, cat2, Group = group) %>%
   facet_grid(cat2~.) +
   ylab("Sayı") + xlab("Response Type") +
   theme(text=element_text(family="Times New Roman", size=12))
+fig1
 
 # mean correct responses
 fig2 <- df_ncr %>% group_by(Group = group, difficulty2, cat2) %>%
@@ -47,6 +46,7 @@ fig2 <- df_ncr %>% group_by(Group = group, difficulty2, cat2) %>%
   geom_errorbar(aes(ymax = mean_response + ci, ymin = mean_response - ci), width = .14) +
   facet_grid(.~cat2) + xlab("Difficulty") + ylab("Mean Response") +
   theme(text=element_text(family= "Times New Roman", size=12))
+fig2
 
 # cumulative mean responses through time course #
 diff_labs <- c("Easy","Medium","Hard")
@@ -61,17 +61,18 @@ fig4 <- ggplot() + geom_point(data = df_correct_means, aes(time, mean_response, 
   geom_vline(data = df_latencies, aes(xintercept = mean_srt, group = Group, color = Group)) +
   facet_grid(cat2 ~ difficulty, labeller = labeller(difficulty = diff_labs)) +
   xlab("Time") + ylab("Mean Response")
+fig4
 
 #### MODEL PLOTS ####
 # total number of correct responses #
 ncr_model_df <- readRDS("./models_data/ncr_model_df.rds")
-
 fig3 <- ncr_model_df %>% ggplot(aes(m, y=factor(parameter, 
                                         levels = rev(levels(factor(parameter)))))) +
   theme(text=element_text(family="Times New Roman", size=12)) + geom_point(size = 2) +
   geom_errorbarh(aes(xmin = l, xmax = h), alpha = 1, height = 0, size = 1) +
   geom_errorbarh(aes(xmin = ll, xmax = hh, height = 0)) + vline_0() +
   xlab("Estimate(log)") + ylab("Coefficients")
+fig3
 
 # number of correct responses through time course #
 time_model_df <- readRDS("./models_data/time_model_df.rds")
@@ -81,6 +82,7 @@ fig5 <- time_model_df %>% ggplot(aes(m, y=factor(parameter,
   geom_errorbarh(aes(xmin = l, xmax = h), alpha = 1, height = 0, size = 1) +
   geom_errorbarh(aes(xmin = ll, xmax = hh, height = 0)) + vline_0() +
   xlab("Estimate(log)") + ylab("Coefficients")
+fig5
 
 #### SIMULATED DATA PLOTS ####
 df_simulated_summary <- readRDS("./models_data/df_simulated_summary.rds")
@@ -89,32 +91,32 @@ pd2 <- position_dodge(0.3)
 
 # plotting different retrieval rate, same vocabulary size
 sim_plot_1 <- df_simulated_summary %>% subset(simulated == "DifRateEqSize") %>%
-  ggplot(aes(time, mean_ncr, group = group, linetype = group, color = group, fill = group, shape = group)) + 
-  geom_line(position = pd2, size = .75) + geom_point(size = 3) +
+  ggplot(aes(time, mean_ncr, group = group, linetype = group, color = group, shape = group)) + 
+  geom_line() + geom_point(size = 3) +
   labs(x="Time (Sec)", y="Mean Response") +
   ggtitle("Similar vocabulary size and different retrieval rate") +
   annotate(geom="text", x=df_simulated_srt_summary$mean_srt[3], y=15, label= expression("SRT"[1]), color="black", size = 4.5) +
   annotate(geom="text", x=df_simulated_srt_summary$mean_srt[1], y=16, label= expression("SRT"[2]), color="black", size = 4.5) +
-  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[3], y = 14.5, xend = df_simulated_srt_summary$mean_srt[3], yend = 13.5), size = 1,
+  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[3], y = 14.5, xend = df_simulated_srt_summary$mean_srt[3], yend = 13.5),
                arrow = arrow(length = unit(0.2, "cm")), color="black",show.legend = F) +
-  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[1], y = 15.5, xend = df_simulated_srt_summary$mean_srt[1], yend = 14.5), size = 1,
+  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[1], y = 15.5, xend = df_simulated_srt_summary$mean_srt[1], yend = 14.5),
                arrow = arrow(length = unit(0.2, "cm")), color="black",show.legend = F) +
   theme(text=element_text(family="Times New Roman", size=12), axis.text = element_blank(), axis.ticks = element_blank())
 
 sim_plot_2 <- df_simulated_summary %>% subset(simulated == "EqRateDifSize") %>%
-  ggplot(aes(time, mean_ncr, group = group, linetype = group, color = group, fill = group, shape = group)) + 
-  geom_line(position = pd2, size = .75) + geom_point(size = 3) +
+  ggplot(aes(time, mean_ncr, group = group, linetype = group, color = group, shape = group)) + 
+  geom_line() + geom_point(size = 3) +
   labs(x="Time (Sec)", y="") +
   ggtitle("Different vocabulary size and similar retrieval rate") +
   annotate(geom="text", x=df_simulated_srt_summary$mean_srt[4], y=14, label= expression("SRT"[1]), color="black", size = 4.5) +
   annotate(geom="text", x=df_simulated_srt_summary$mean_srt[2], y=9.5, label= expression("SRT"[2]), color="black", size = 4.5) + 
-  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[4], y = 13.5, xend = df_simulated_srt_summary$mean_srt[4], yend = 12.5), size = 1,
+  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[4], y = 13.5, xend = df_simulated_srt_summary$mean_srt[4], yend = 12.5),
                arrow = arrow(length = unit(0.2, "cm")), color="black",show.legend = F) +
-  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[2], y = 9, xend = df_simulated_srt_summary$mean_srt[2], yend = 8), size = 1,
-               arrow = arrow(length = unit(0.2, "cm")), color="black",show.legend = F) +
+  geom_segment(aes(x = df_simulated_srt_summary$mean_srt[2], y = 9, xend = df_simulated_srt_summary$mean_srt[2], yend = 8),
+               arrow = arrow(length = unit(0.2, "cm")), color="black", show.legend = F) +
   theme(text=element_text(family="Times New Roman", size=12), axis.text = element_blank(), axis.ticks = element_blank())
 
-combined_plot <- ggarrange(sim_plot_1, sim_plot_2, ncol=2, nrow=1, common.legend = TRUE,legend="bottom",labels=c("A", "B"))
+combined_plot <- ggarrange(sim_plot_1, sim_plot_2, ncol=2, nrow=1, common.legend = TRUE, legend="bottom", labels=c("A", "B"))
 combined_plot
 
 #### SAVE PLOTS ####
@@ -142,3 +144,9 @@ ggsave("VF-Fig_4.png", plot = fig4, width = 6, height = 4, path = "./VF-figures"
 ggsave("VF-Fig_5.pdf", plot = fig5, width = 5, height = 4, device = cairo_pdf, path = "./VF-figures")
 ggsave("VF-Fig_5.tiff", plot = fig5, width = 5, height = 4, path = "./VF-figures")
 ggsave("VF-Fig_5.png", plot = fig5, width = 5, height = 4, path = "./VF-figures")
+
+# figure simulation save
+ggsave("VF-Fig_sim.pdf", plot = combined_plot, width = 9, height = 5, device = cairo_pdf, path = "./VF-figures")
+ggsave("VF-Fig_sim.tiff", plot = combined_plot, width = 9, height = 5, path = "./VF-figures")
+ggsave("VF-Fig_sim.png", plot = combined_plot, width = 9, height = 5, path = "./VF-figures")
+
