@@ -34,7 +34,7 @@ fig1 <- df %>% dplyr::select(response_type = type, cat2, Group = group) %>%
   geom_bar(position = "dodge") +
   stat_count(geom = "text", aes(color = Group, label = ..count..), vjust = "bottom", position = position_dodge(0.85)) +
   facet_grid(cat2~.) +
-  ylab("Sayı") + xlab("Response Type") +
+  ylab("Count") + xlab("Response Type") +
   theme(text=element_text(family="Times New Roman", size=12))
 fig1
 
