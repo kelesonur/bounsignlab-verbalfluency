@@ -124,7 +124,7 @@ contrasts(df_cum_time$group)
 
 df_cum_time$time %<>% as.factor()
 contrasts(df_cum_time$time)
-contrasts(df_cum_time$time) <- contr.sdif(7)
+contrasts(df_cum_time$time) <- contr.sdif(6)
 contrasts(df_cum_time$time)
 
 # regression model

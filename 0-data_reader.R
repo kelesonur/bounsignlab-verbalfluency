@@ -103,12 +103,6 @@ for (each in unique(df_cum_time$subject)){
       
       next}
     
-    #adding point zero
-    add_zero <- tibble(subject = x$subject[1], group = x$group[1], item = x$item[1], category = x$category[1],
-                       difficulty = x$difficulty[1], cat2 = x$cat2[1], aoa = x$aoa[1], 
-                       time = 0, time_total = 0, time_cum = 0)
-    df_cum_time %<>% rbind(add_zero)
-    
     for(all in c(1:6)){
       x %<>% arrange(subject, item, time)
       time = all*10
