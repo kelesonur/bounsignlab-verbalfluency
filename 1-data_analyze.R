@@ -121,7 +121,6 @@ contrasts(df_cum_time$group)
 contrasts(df_cum_time$group) <- contr.sdif(2)
 contrasts(df_cum_time$group)
 
-
 df_cum_time$time %<>% as.factor()
 contrasts(df_cum_time$time)
 contrasts(df_cum_time$time) <- contr.sdif(6)
@@ -154,7 +153,6 @@ time_model_df$parameter %<>% dplyr::recode(`group2M1` = "Native", `time2M1` = "2
 
 saveRDS(time_model_df, "./models_data/time_model_df.rds")
 write.csv(time_model_df,"./models_data/time_model_results.csv")
-
 
 #### SIMULATED MEAN NCR AND SRT VALUES ####
 # function for calculating %95 confidence intervals
