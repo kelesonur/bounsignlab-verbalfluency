@@ -29,6 +29,11 @@ contrasts(df_ncr$group)
 contrasts(df_ncr$group) <- contr.sdif(2)
 contrasts(df_ncr$group)
 
+# rename and reorder AOA factor, set contrasts
+contrasts(df_ncr$aoa_named)
+contrasts(df_ncr$aoa_named) <- contr.sdif(3)
+contrasts(df_ncr$aoa_named)
+
 # model responses
 ncr_model <- brm(ncr ~ (cat2+difficulty+group)^2, 
                  family = poisson(link="log"), data = df_ncr,
@@ -58,6 +63,43 @@ ncr_model_df$parameter %<>% dplyr::recode(`cat21` = "HS",`cat22` = "LOC", `group
 saveRDS(ncr_model_df, "./models_data/ncr_model_df.rds")
 write.csv(ncr_model_df,"./models_data/ncr_model_results.csv")
 
+# age group model 
+ncr_model_group <- brm(ncr ~ (cat2+difficulty+aoa_named)^2, 
+                 family = poisson(link="log"), data = df_ncr,
+                 chains = 4, cores = 4, iter= 3000, warmup = 2000, file = "./models_data/ncr_model_group")
+
+# model df for plotting
+ncr_model_group_df <- ncr_model_group %>%
+  mcmc_intervals_data(pars = vars(starts_with("b_")), prob_outer = 0.95) %>%
+  tidyr::separate(col = "parameter", into = c("x","parameter"),
+                  sep = "\\_", fill = "right", extra = "merge") %>%
+  subset(parameter !="Intercept") %>% dplyr::select(-x)
+
+# recode levels to make readable
+ncr_model_group_df$parameter %<>% dplyr::recode(`cat21` = "HS",`cat22` = "LOC", 
+                                          `aoa_named2M1` = "Group2vs1", `aoa_named3M2` = "Group3vs2",
+                                          `difficulty2M1` = "Medium-Easy", `difficulty3M2` = "Hard-Medium",
+                                          `cat21:difficulty2M1` = "HS*Med-Easy",
+                                          `cat21:difficulty3M2` = "HS*Hard-Med",
+                                          `cat22:difficulty2M1` = "LOC*Med-Easy",
+                                          `cat22:difficulty3M2` = "LOC*Hard-Med",
+                                          `cat21:aoa_named2M1`= "HS*Group2vs1",
+                                          `cat22:aoa_named2M1`= "LOC*Group2vs1",
+                                          `cat21:aoa_named3M2`= "HS*Group3vs2",
+                                          `cat22:aoa_named3M2`= "LOC*Group3vs2",
+                                          `difficulty2M1:aoa_named2M1` = "Med-Easy*Group2vs1",
+                                          `difficulty3M2:aoa_named2M1` = "Hard-Med*Group2vs1",
+                                          `difficulty2M1:aoa_named3M2` = "Med-Easy*Group3vs2",
+                                          `difficulty3M2:aoa_named3M2` = "Hard-Med*Group3vs2") %>%
+  reorder.factor(new.order = c("HS", "LOC", "Group2vs1", "Group3vs2","Medium-Easy",
+                               "Hard-Medium", "HS*Med-Easy", "HS*Hard-Med", "LOC*Med-Easy", "LOC*Hard-Med",
+                               "HS*Group2vs1", "LOC*Group2vs1", "HS*Group3vs2", "LOC*Group3vs2",
+                               "Med-Easy*Group2vs1", "Hard-Med*Group2vs1",
+                               "Med-Easy*Group3vs2","Hard-Med*Group3vs2"))
+
+saveRDS(ncr_model_group_df, "./models_data/ncr_model_group_df.rds")
+write.csv(ncr_model_group_df,"./models_data/ncr_model_group_results.csv")
+
 #### TIME COURSE ANALYSIS ####
 df_cum_time <- readRDS("./aggregated_data/df_cum_time.rds")
 
@@ -73,7 +115,6 @@ contrasts(df_cum_time$cat2)
 contrasts(df_cum_time$difficulty)
 contrasts(df_cum_time$difficulty) <- contr.sdif(3)
 contrasts(df_cum_time$difficulty)
-
 
 df_cum_time$group %<>% reorder.factor(new.order = c("Late","Native"))
 contrasts(df_cum_time$group)
@@ -115,7 +156,6 @@ saveRDS(time_model_df, "./models_data/time_model_df.rds")
 write.csv(time_model_df,"./models_data/time_model_results.csv")
 
 
-
 #### SIMULATED MEAN NCR AND SRT VALUES ####
 # function for calculating %95 confidence intervals
 ci <- function(x){1.96*(sd(x)/sqrt(length(x)))}
@@ -151,7 +191,6 @@ vffunction <- function (N, mean_latency){
   srt <- mean(k)
   
   df <- data.frame(ncr = correct, time = time, srt = srt)
-  
 }
 
 # loop for different retrieval rate but similar vocab size.

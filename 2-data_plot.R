@@ -48,6 +48,16 @@ fig2 <- df_ncr %>% group_by(Group = group, difficulty2, cat2) %>%
   theme(text=element_text(family= "Times New Roman", size=12))
 fig2
 
+# mean correct responses by 3 age groups
+fig_extra <- df_ncr %>% group_by(Group = aoa_named, difficulty2, cat2) %>%
+  summarise(mean_response = mean(ncr), ci = ci(ncr)) %>%
+  ggplot(aes(difficulty2,mean_response, group = Group, color = Group)) + 
+  geom_point() + geom_line() + 
+  geom_errorbar(aes(ymax = mean_response + ci, ymin = mean_response - ci), width = .14) +
+  facet_grid(.~cat2) + xlab("Difficulty") + ylab("Mean Response") +
+  theme(text=element_text(family= "Times New Roman", size=12))
+fig_extra
+
 # cumulative mean responses through time course #
 diff_labs <- c("Easy","Medium","Hard")
 names(diff_labs) <- c("1","2","3")
@@ -74,6 +84,16 @@ fig3 <- ncr_model_df %>% ggplot(aes(m, y=factor(parameter,
   xlab("Estimate(log)") + ylab("Coefficients")
 fig3
 
+# total number of correct responses model by 3 age groups
+ncr_model2_df <- readRDS("./models_data/ncr_model_group_df.rds")
+fig_model_extra <- ncr_model2_df %>% ggplot(aes(m, y=factor(parameter, 
+                                                levels = rev(levels(factor(parameter)))))) +
+  theme(text=element_text(family="Times New Roman", size=12)) + geom_point(size = 2) +
+  geom_errorbarh(aes(xmin = l, xmax = h), alpha = 1, height = 0, size = 1) +
+  geom_errorbarh(aes(xmin = ll, xmax = hh, height = 0)) + vline_0() +
+  xlab("Estimate(log)") + ylab("Coefficients")
+fig_model_extra
+
 # number of correct responses through time course #
 time_model_df <- readRDS("./models_data/time_model_df.rds")
 fig5 <- time_model_df %>% ggplot(aes(m, y=factor(parameter, 
@@ -83,6 +103,7 @@ fig5 <- time_model_df %>% ggplot(aes(m, y=factor(parameter,
   geom_errorbarh(aes(xmin = ll, xmax = hh, height = 0)) + vline_0() +
   xlab("Estimate(log)") + ylab("Coefficients")
 fig5
+
 
 #### SIMULATED DATA PLOTS ####
 df_simulated_summary <- readRDS("./models_data/df_simulated_summary.rds")
@@ -149,4 +170,14 @@ ggsave("VF-Fig_5.png", plot = fig5, width = 5, height = 4, path = "./VF-figures"
 ggsave("VF-Fig_sim.pdf", plot = combined_plot, width = 9, height = 5, device = cairo_pdf, path = "./VF-figures")
 ggsave("VF-Fig_sim.tiff", plot = combined_plot, width = 9, height = 5, path = "./VF-figures")
 ggsave("VF-Fig_sim.png", plot = combined_plot, width = 9, height = 5, path = "./VF-figures")
+
+# figure extra means save
+ggsave("VF-Fig_extra.pdf", plot = fig_extra, width = 9, height = 5, device = cairo_pdf, path = "./VF-figures")
+ggsave("VF-Fig_extra.tiff", plot = fig_extra, width = 9, height = 5, path = "./VF-figures")
+ggsave("VF-Fig_extra.png", plot = fig_extra, width = 9, height = 5, path = "./VF-figures")
+
+# figure extra model save
+ggsave("VF-Fig_fig_model_extra.pdf", plot = fig_model_extra, width = 9, height = 5, device = cairo_pdf, path = "./VF-figures")
+ggsave("VF-Fig_fig_model_extra.tiff", plot = fig_model_extra, width = 9, height = 5, path = "./VF-figures")
+ggsave("VF-Fig_fig_model_extra.png", plot = fig_model_extra, width = 9, height = 5, path = "./VF-figures")
 

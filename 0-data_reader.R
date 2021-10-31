@@ -1,6 +1,7 @@
 library(tidyverse)
 library(magrittr)
 library(gdata)
+library(janitor)
 
 # read the data frame, drop NA values
 df <- read_csv("vf_data.csv") %>% drop_na()
@@ -19,6 +20,20 @@ df$type %<>% as.factor()
 df$cat2 <- with(df, case_when(item %in% c(1:6) ~ "HS",
                               item %in% c(7:12) ~ "LOC",
                               item %in% c(13:18) ~ "SEM")) %>% as.factor()
+
+
+# read demographic data frame
+df_demos <- read_csv2("demographics.csv", col_types = list(.default= col_character())) %>%
+  dplyr::rename(subject=No) %>% clean_names() %>% dplyr::select(-(8:12),-status, -sex)
+
+# set vector types
+df_demos$subject %<>% as.integer()
+df_demos$age %<>% as.integer()
+df_demos$use %<>% as.numeric()
+df_demos$aoa_median %<>% as.numeric()
+df_demos$aoa %<>% as.factor()
+
+df %<>% left_join(df_demos, by="subject")
 
 saveRDS(df,"./aggregated_data/df.rds")
 
@@ -59,12 +74,15 @@ saveRDS(df_correct, "./aggregated_data/df_correct.rds")
 # data frame for number of responses model
 df_ncr <- df_correct %>% 
   dplyr::distinct(subject,item, .keep_all = T) %>% 
-  dplyr::arrange(subject,item) %>% dplyr::select(subject, group, item, category, difficulty, ncr, cat2) %>% ungroup()
+  dplyr::arrange(subject,item) %>% dplyr::select(subject, group, item, category, difficulty, ncr, cat2, aoa) %>% ungroup()
+df_ncr$aoa_named <- dplyr::recode(df_ncr$aoa, `0-3` = "Early", `4-7`= "Mid", `8-12`="Late", `13-17`="Late")
+df_ncr$aoa_named %<>% reorder.factor(new.order = c("Late","Mid","Early"))
 saveRDS(df_ncr, "./aggregated_data/df_ncr.rds")
 
 # data frame for time course analysis 
 df_time <- df_correct %>% dplyr::distinct(subject,item, time, .keep_all = T) %>%
-  dplyr::arrange(subject,item,time) %>% dplyr::select(-difference, -time_interval, -ncr, -n_correct, -latency_ms) %>% ungroup()
+  dplyr::arrange(subject,item,time) %>% dplyr::select(-difference, -time_interval, -ncr, -n_correct, -latency_ms,
+                                                      -age,-use,-aoa_median) %>% ungroup()
 df_time %<>% group_by(subject,item) %>% mutate(time_cum = cumsum(time_total))
 saveRDS(df_time,"./aggregated_data/df_time.rds")
 
