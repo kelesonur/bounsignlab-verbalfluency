@@ -89,15 +89,37 @@ saveRDS(df_time,"./aggregated_data/df_time.rds")
 # fill empty intervals for cumulative reading
 df_cum_time <- df_time %>% arrange(subject, item, time)
 
+missing_combos <- tibble(subject = integer(), item = integer())
+
 for (each in unique(df_cum_time$subject)){
   for(every in unique(df_cum_time$item)){
     x <- df_cum_time %>% subset(subject == each & item == every)
+    
+    if (is_empty(x$subject)){
+      missing_item <- sprintf("Subject %s missing response to item %s", each, every)
+      print(missing_item)
+      missing <- tibble(subject = each, item = every)
+      missing_combos %<>% rbind(missing)
+      
+      next}
+    
+    #adding point zero
+    add_zero <- tibble(subject = x$subject[1], group = x$group[1], item = x$item[1], category = x$category[1],
+                       difficulty = x$difficulty[1], cat2 = x$cat2[1], aoa = x$aoa[1], 
+                       time = 0, time_total = 0, time_cum = 0)
+    df_cum_time %<>% rbind(add_zero)
+    
     for(all in c(1:6)){
-      x %<>% arrange(subject,item, time)
+      x %<>% arrange(subject, item, time)
       time = all*10
       if (time != x$time[all] || is.na(x$time[all])){
         y <- tibble(subject = x$subject[1], group = x$group[1], item = x$item[1], category = x$category[1],
-                    difficulty = x$difficulty[1], cat2 = x$cat2[1], time = time, time_total = 0, time_cum = x$time_cum[all-1])
+                    difficulty = x$difficulty[1], cat2 = x$cat2[1], aoa = x$aoa[1], time = time, time_total = 0, time_cum = x$time_cum[all-1])
+        if(is.na(y$subject) || is_empty(y$subject)){
+          message <- sprintf("NA spotted at subject %s, item %s, interval %s",each,every,all)
+          print(message)
+          break
+        }
         df_cum_time %<>% rbind(y)
         x %<>% rbind(y)
       }
