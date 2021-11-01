@@ -49,6 +49,7 @@ fig2 <- df_ncr %>% group_by(Group = group, difficulty2, cat2) %>%
 fig2
 
 # mean correct responses by 3 age groups
+
 fig_extra <- df_ncr %>% group_by(Group = aoa_named, difficulty2, cat2) %>%
   summarise(mean_response = mean(ncr), ci = ci(ncr)) %>%
   ggplot(aes(difficulty2,mean_response, group = Group, color = Group)) + 
@@ -172,12 +173,12 @@ ggsave("VF-Fig_sim.tiff", plot = combined_plot, width = 9, height = 5, path = ".
 ggsave("VF-Fig_sim.png", plot = combined_plot, width = 9, height = 5, path = "./VF-figures")
 
 # figure extra means save
-ggsave("VF-Fig_extra.pdf", plot = fig_extra, width = 9, height = 5, device = cairo_pdf, path = "./VF-figures")
-ggsave("VF-Fig_extra.tiff", plot = fig_extra, width = 9, height = 5, path = "./VF-figures")
-ggsave("VF-Fig_extra.png", plot = fig_extra, width = 9, height = 5, path = "./VF-figures")
+ggsave("VF-Fig_extra.pdf", plot = fig_extra, width = 5, height = 2.5, device = cairo_pdf, path = "./VF-figures")
+ggsave("VF-Fig_extra.tiff", plot = fig_extra, width = 5, height = 2.5, path = "./VF-figures")
+ggsave("VF-Fig_extra.png", plot = fig_extra, width = 5, height = 2.5, path = "./VF-figures")
 
 # figure extra model save
-ggsave("VF-Fig_fig_model_extra.pdf", plot = fig_model_extra, width = 9, height = 5, device = cairo_pdf, path = "./VF-figures")
-ggsave("VF-Fig_fig_model_extra.tiff", plot = fig_model_extra, width = 9, height = 5, path = "./VF-figures")
-ggsave("VF-Fig_fig_model_extra.png", plot = fig_model_extra, width = 9, height = 5, path = "./VF-figures")
+ggsave("VF-Fig_fig_model_extra.pdf", plot = fig_model_extra, width = 5, height = 4, device = cairo_pdf, path = "./VF-figures")
+ggsave("VF-Fig_fig_model_extra.tiff", plot = fig_model_extra, width = 5, height = 4, path = "./VF-figures")
+ggsave("VF-Fig_fig_model_extra.png", plot = fig_model_extra, width = 5, height = 4, path = "./VF-figures")
 

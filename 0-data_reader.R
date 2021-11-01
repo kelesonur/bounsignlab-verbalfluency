@@ -75,8 +75,8 @@ saveRDS(df_correct, "./aggregated_data/df_correct.rds")
 df_ncr <- df_correct %>% 
   dplyr::distinct(subject,item, .keep_all = T) %>% 
   dplyr::arrange(subject,item) %>% dplyr::select(subject, group, item, category, difficulty, ncr, cat2, aoa) %>% ungroup()
-df_ncr$aoa_named <- dplyr::recode(df_ncr$aoa, `0-3` = "Early", `4-7`= "Mid", `8-12`="Late", `13-17`="Late")
-df_ncr$aoa_named %<>% reorder.factor(new.order = c("Late","Mid","Early"))
+df_ncr$aoa_named <- dplyr::recode(df_ncr$aoa, `0-3` = "Native", `4-7`= "Early", `8-12`="Late", `13-17`="Late")
+df_ncr$aoa_named %<>% reorder.factor(new.order = c("Late","Early","Native"))
 saveRDS(df_ncr, "./aggregated_data/df_ncr.rds")
 
 # data frame for time course analysis 
