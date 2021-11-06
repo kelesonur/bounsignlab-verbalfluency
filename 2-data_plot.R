@@ -50,19 +50,19 @@ fig2
 
 # mean correct responses by 3 age groups
 
-fig_extra <- df_ncr %>% group_by(Group = aoa_named, difficulty2, cat2) %>%
+fig_supplementary <- df_ncr %>% group_by(Group = aoa_named, difficulty2, cat2) %>%
   summarise(mean_response = mean(ncr), ci = ci(ncr)) %>%
   ggplot(aes(difficulty2,mean_response, group = Group, color = Group)) + 
   geom_point() + geom_line() + 
   geom_errorbar(aes(ymax = mean_response + ci, ymin = mean_response - ci), width = .14) +
   facet_grid(.~cat2) + xlab("Difficulty") + ylab("Mean Response") +
   theme(text=element_text(family= "Times New Roman", size=12))
-fig_extra
+fig_supplementary
 
 # cumulative mean responses through time course #
 diff_labs <- c("Easy","Medium","Hard")
 names(diff_labs) <- c("1","2","3")
-fig4 <- ggplot() + geom_point(data = df_correct_means, aes(time, mean_response, group = Group, color = Group)) +
+fig5 <- ggplot() + geom_point(data = df_correct_means, aes(time, mean_response, group = Group, color = Group)) +
   geom_line(data = df_correct_means, aes(time, mean_response, group = Group, color = Group)) +
   geom_errorbar(data = df_correct_means, aes(x= time, y= mean_response, 
                                              ymax = mean_response + ci, ymin = mean_response - ci,
@@ -72,7 +72,7 @@ fig4 <- ggplot() + geom_point(data = df_correct_means, aes(time, mean_response, 
   geom_vline(data = df_latencies, aes(xintercept = mean_srt, group = Group, color = Group)) +
   facet_grid(cat2 ~ difficulty, labeller = labeller(difficulty = diff_labs)) +
   xlab("Time") + ylab("Mean Response")
-fig4
+fig5
 
 #### MODEL PLOTS ####
 # total number of correct responses #
@@ -87,23 +87,23 @@ fig3
 
 # total number of correct responses model by 3 age groups
 ncr_model2_df <- readRDS("./models_data/ncr_model_group_df.rds")
-fig_model_extra <- ncr_model2_df %>% ggplot(aes(m, y=factor(parameter, 
+fig_model_supplementary <- ncr_model2_df %>% ggplot(aes(m, y=factor(parameter, 
                                                 levels = rev(levels(factor(parameter)))))) +
   theme(text=element_text(family="Times New Roman", size=12)) + geom_point(size = 2) +
   geom_errorbarh(aes(xmin = l, xmax = h), alpha = 1, height = 0, size = 1) +
   geom_errorbarh(aes(xmin = ll, xmax = hh, height = 0)) + vline_0() +
   xlab("Estimate(log)") + ylab("Coefficients")
-fig_model_extra
+fig_model_supplementary
 
 # number of correct responses through time course #
 time_model_df <- readRDS("./models_data/time_model_df.rds")
-fig5 <- time_model_df %>% ggplot(aes(m, y=factor(parameter, 
+fig6 <- time_model_df %>% ggplot(aes(m, y=factor(parameter, 
                                          levels = rev(levels(factor(parameter)))))) +
   theme(text=element_text(family="Times New Roman", size=12)) + geom_point(size = 2) +
   geom_errorbarh(aes(xmin = l, xmax = h), alpha = 1, height = 0, size = 1) +
   geom_errorbarh(aes(xmin = ll, xmax = hh, height = 0)) + vline_0() +
   xlab("Estimate(log)") + ylab("Coefficients")
-fig5
+fig6
 
 
 #### SIMULATED DATA PLOTS ####
@@ -117,12 +117,13 @@ sim_plot_1 <- df_simulated_summary %>% subset(simulated == "DifRateEqSize") %>%
   geom_line() + geom_point(size = 3) +
   labs(x="Time (Sec)", y="Mean Response") +
   ggtitle("Similar vocabulary size and different retrieval rate") +
-  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[3], y=15, label= expression("SRT"[1]), color="black", size = 4.5) +
-  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[1], y=16, label= expression("SRT"[2]), color="black", size = 4.5) +
+  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[3], y=15, label= expression("SRT"[1]), color="black", size = 3.5) +
+  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[1], y=16, label= expression("SRT"[2]), color="black", size = 3.5) +
   geom_segment(aes(x = df_simulated_srt_summary$mean_srt[3], y = 14.5, xend = df_simulated_srt_summary$mean_srt[3], yend = 13.5),
                arrow = arrow(length = unit(0.2, "cm")), color="black",show.legend = F) +
   geom_segment(aes(x = df_simulated_srt_summary$mean_srt[1], y = 15.5, xend = df_simulated_srt_summary$mean_srt[1], yend = 14.5),
                arrow = arrow(length = unit(0.2, "cm")), color="black",show.legend = F) +
+  theme(legend.position='none') +
   theme(text=element_text(family="Times New Roman", size=12), axis.text = element_blank(), axis.ticks = element_blank())
 
 sim_plot_2 <- df_simulated_summary %>% subset(simulated == "EqRateDifSize") %>%
@@ -130,16 +131,17 @@ sim_plot_2 <- df_simulated_summary %>% subset(simulated == "EqRateDifSize") %>%
   geom_line() + geom_point(size = 3) +
   labs(x="Time (Sec)", y="") +
   ggtitle("Different vocabulary size and similar retrieval rate") +
-  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[4], y=14, label= expression("SRT"[1]), color="black", size = 4.5) +
-  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[2], y=9.5, label= expression("SRT"[2]), color="black", size = 4.5) + 
+  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[4], y=14, label= expression("SRT"[1]), color="black", size = 3.5) +
+  annotate(geom="text", x=df_simulated_srt_summary$mean_srt[2], y=9.5, label= expression("SRT"[2]), color="black", size = 3.5) + 
   geom_segment(aes(x = df_simulated_srt_summary$mean_srt[4], y = 13.5, xend = df_simulated_srt_summary$mean_srt[4], yend = 12.5),
                arrow = arrow(length = unit(0.2, "cm")), color="black",show.legend = F) +
   geom_segment(aes(x = df_simulated_srt_summary$mean_srt[2], y = 9, xend = df_simulated_srt_summary$mean_srt[2], yend = 8),
                arrow = arrow(length = unit(0.2, "cm")), color="black", show.legend = F) +
+  theme(legend.position='none') +
   theme(text=element_text(family="Times New Roman", size=12), axis.text = element_blank(), axis.ticks = element_blank())
 
-combined_plot <- ggarrange(sim_plot_1, sim_plot_2, ncol=2, nrow=1, common.legend = TRUE, legend="bottom", labels=c("A", "B"))
-combined_plot
+fig4 <- ggarrange(sim_plot_1, sim_plot_2, ncol=2, nrow=1, labels=c("A", "B"))
+fig4
 
 #### SAVE PLOTS ####
 # figure 1 save
@@ -158,27 +160,27 @@ ggsave("VF-Fig_3.tiff", plot = fig3, width = 5, height = 4, path = "./VF-figures
 ggsave("VF-Fig_3.png", plot = fig3, width = 5, height = 4, path = "./VF-figures")
 
 # figure 4 save
-ggsave("VF-Fig_4.pdf", plot = fig4, width = 6, height = 4, device = cairo_pdf, path = "./VF-figures")
-ggsave("VF-Fig_4.tiff", plot = fig4, width = 6, height = 4, path = "./VF-figures")
-ggsave("VF-Fig_4.png", plot = fig4, width = 6, height = 4, path = "./VF-figures")
+ggsave("VF-Fig_4.pdf", plot = fig4, width = 8, height = 4, device = cairo_pdf, path = "./VF-figures")
+ggsave("VF-Fig_4.tiff", plot = fig4, width = 8, height = 4, path = "./VF-figures")
+ggsave("VF-Fig_4.png", plot = fig4, width = 8, height = 4, path = "./VF-figures")
 
 # figure 5 save
-ggsave("VF-Fig_5.pdf", plot = fig5, width = 5, height = 4, device = cairo_pdf, path = "./VF-figures")
-ggsave("VF-Fig_5.tiff", plot = fig5, width = 5, height = 4, path = "./VF-figures")
-ggsave("VF-Fig_5.png", plot = fig5, width = 5, height = 4, path = "./VF-figures")
+ggsave("VF-Fig_5.pdf", plot = fig5, width = 6, height = 4, device = cairo_pdf, path = "./VF-figures")
+ggsave("VF-Fig_5.tiff", plot = fig5, width = 6, height = 4, path = "./VF-figures")
+ggsave("VF-Fig_5.png", plot = fig5, width = 6, height = 4, path = "./VF-figures")
 
-# figure simulation save
-ggsave("VF-Fig_sim.pdf", plot = combined_plot, width = 9, height = 5, device = cairo_pdf, path = "./VF-figures")
-ggsave("VF-Fig_sim.tiff", plot = combined_plot, width = 9, height = 5, path = "./VF-figures")
-ggsave("VF-Fig_sim.png", plot = combined_plot, width = 9, height = 5, path = "./VF-figures")
+# figure 6 save
+ggsave("VF-Fig_6.pdf", plot = fig6, width = 5, height = 4, device = cairo_pdf, path = "./VF-figures")
+ggsave("VF-Fig_6.tiff", plot = fig6, width = 5, height = 4, path = "./VF-figures")
+ggsave("VF-Fig_6.png", plot = fig6, width = 5, height = 4, path = "./VF-figures")
 
 # figure extra means save
-ggsave("VF-Fig_extra.pdf", plot = fig_extra, width = 5, height = 2.5, device = cairo_pdf, path = "./VF-figures")
-ggsave("VF-Fig_extra.tiff", plot = fig_extra, width = 5, height = 2.5, path = "./VF-figures")
-ggsave("VF-Fig_extra.png", plot = fig_extra, width = 5, height = 2.5, path = "./VF-figures")
+ggsave("VF-Fig_supplementary.pdf", plot = fig_supplementary, width = 5, height = 2.5, device = cairo_pdf, path = "./VF-figures")
+ggsave("VF-Fig_supplementary.tiff", plot = fig_supplementary, width = 5, height = 2.5, path = "./VF-figures")
+ggsave("VF-Fig_supplementary.png", plot = fig_supplementary, width = 5, height = 2.5, path = "./VF-figures")
 
 # figure extra model save
-ggsave("VF-Fig_fig_model_extra.pdf", plot = fig_model_extra, width = 5, height = 4, device = cairo_pdf, path = "./VF-figures")
-ggsave("VF-Fig_fig_model_extra.tiff", plot = fig_model_extra, width = 5, height = 4, path = "./VF-figures")
-ggsave("VF-Fig_fig_model_extra.png", plot = fig_model_extra, width = 5, height = 4, path = "./VF-figures")
+ggsave("VF-Fig_fig_model_supplementary.pdf", plot = fig_model_supplementary, width = 5, height = 4, device = cairo_pdf, path = "./VF-figures")
+ggsave("VF-Fig_fig_model_supplementary.tiff", plot = fig_model_supplementary, width = 5, height = 4, path = "./VF-figures")
+ggsave("VF-Fig_fig_model_supplementary.png", plot = fig_model_supplementary, width = 5, height = 4, path = "./VF-figures")
 
