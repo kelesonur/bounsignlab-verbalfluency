@@ -41,7 +41,7 @@ fig1
 # mean correct responses
 fig2 <- df_ncr %>% group_by(Group = group, difficulty2, cat2) %>%
   summarise(mean_response = mean(ncr), ci = ci(ncr)) %>%
-  ggplot(aes(difficulty2,mean_response, group = Group, color = Group)) + 
+  ggplot(aes(difficulty2,mean_response, group = Group, color = Group, shape=Group)) + 
   geom_point() + geom_line() + 
   geom_errorbar(aes(ymax = mean_response + ci, ymin = mean_response - ci), width = .14) +
   facet_grid(.~cat2) + xlab("Difficulty") + ylab("Mean Response") +
@@ -62,7 +62,7 @@ fig_supplementary
 # cumulative mean responses through time course #
 diff_labs <- c("Easy","Medium","Hard")
 names(diff_labs) <- c("1","2","3")
-fig5 <- ggplot() + geom_point(data = df_correct_means, aes(time, mean_response, group = Group, color = Group)) +
+fig5 <- ggplot() + geom_point(data = df_correct_means, aes(time, mean_response, group = Group, color = Group, shape= Group)) +
   geom_line(data = df_correct_means, aes(time, mean_response, group = Group, color = Group)) +
   geom_errorbar(data = df_correct_means, aes(x= time, y= mean_response, 
                                              ymax = mean_response + ci, ymin = mean_response - ci,
@@ -71,7 +71,7 @@ fig5 <- ggplot() + geom_point(data = df_correct_means, aes(time, mean_response, 
                                     ymin = -Inf, ymax = +Inf, fill = Group, group = Group),alpha = .3) +
   geom_vline(data = df_latencies, aes(xintercept = mean_srt, group = Group, color = Group)) +
   facet_grid(cat2 ~ difficulty, labeller = labeller(difficulty = diff_labs)) +
-  xlab("Time") + ylab("Mean Response")
+  xlab("Time") + ylab("Cumulative Mean Response")
 fig5
 
 #### MODEL PLOTS ####
@@ -115,7 +115,7 @@ pd2 <- position_dodge(0.3)
 sim_plot_1 <- df_simulated_summary %>% subset(simulated == "DifRateEqSize") %>%
   ggplot(aes(time, mean_ncr, group = group, linetype = group, color = group, shape = group)) + 
   geom_line() + geom_point(size = 3) +
-  labs(x="Time (Sec)", y="Mean Response") +
+  labs(x="Time (Sec)", y="Cumulative Mean Response") +
   ggtitle("Similar vocabulary size and different retrieval rate") +
   annotate(geom="text", x=df_simulated_srt_summary$mean_srt[3], y=15, label= expression("SRT"[1]), color="black", size = 3.5) +
   annotate(geom="text", x=df_simulated_srt_summary$mean_srt[1], y=16, label= expression("SRT"[2]), color="black", size = 3.5) +
