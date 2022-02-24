@@ -52,9 +52,9 @@ fig2
 
 fig_supplementary <- df_ncr %>% group_by(Group = aoa_named, difficulty2, cat2) %>%
   summarise(mean_response = mean(ncr), ci = ci(ncr)) %>%
-  ggplot(aes(difficulty2,mean_response, group = Group, color = Group)) + 
-  geom_point() + geom_line() + 
-  geom_errorbar(aes(ymax = mean_response + ci, ymin = mean_response - ci), width = .14) +
+  ggplot(aes(difficulty2,mean_response, group = Group, color = Group, shape= Group)) + 
+  geom_point(position = position_dodge(.2)) + geom_line(position = position_dodge(.2)) + 
+  geom_errorbar(aes(ymax = mean_response + ci, ymin = mean_response - ci), width = .14,position = position_dodge(.2)) +
   facet_grid(.~cat2) + xlab("Difficulty") + ylab("Mean Response") +
   theme(text=element_text(family= "Times New Roman", size=12))
 fig_supplementary
